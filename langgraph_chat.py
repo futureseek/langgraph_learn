@@ -8,6 +8,7 @@ from langgraph.graph import StateGraph, END
 from langchain_community.tools.tavily_search import TavilySearchResults
 from tools import MessagerManager
 from tools.document_exporter import create_document_export_tool
+from tools.DocumentReader import create_document_reader_tool
 
 
 
@@ -86,25 +87,36 @@ if __name__ == "__main__":
     
     # 创建工具列表
     search_tool = TavilySearchResults(max_results=2)
-    document_tool = create_document_export_tool()
-    tools = [search_tool, document_tool]
+    document_export_tool = create_document_export_tool()
+    document_reader_tool = create_document_reader_tool()
+    tools = [search_tool, document_export_tool, document_reader_tool]
 
     prompt ="""
-    你是一名聪明的科研助理。你有以下能力：
+    你是一名智能机器人助手。你有以下能力：
     
-    1. 🔍 搜索引擎：可以搜索最新信息
-    2. 📄 文档导出：可以将内容保存为 Markdown 文档
+    🔍 信息获取：
+    1. 搜索引擎：搜索最新的网络信息
+    2. 文档读取：读取本地文件内容（支持 txt, md, py, js, json 等多种格式）
     
-    使用指南：
-    - 当用户需要搜索信息时，使用搜索工具
-    - 当用户要求"整理到文档"、"保存到文件"、"导出报告"等时，使用文档导出工具
-    - 可以先搜索信息，然后将结果整理导出到文档
+    📝 内容处理：
+    3. 文档导出：将内容保存为 Markdown 格式文档
     
-    文档导出格式：
-    - 如果用户指定了标题，使用格式："标题|内容"
-    - 如果没有指定标题，直接传入内容即可
+    💡 使用指南：
+    - 当用户询问本地文件内容时，使用文档读取工具
+    - 当用户需要网络搜索时，使用搜索工具
+    - 当用户要求保存、导出、整理到文档时，使用文档导出工具
+    - 可以组合使用：读取本地文档 → 分析内容 → 搜索相关信息 → 导出综合报告
     
-    你可以多次调用工具，也可以组合使用（比如先搜索，再导出）。
+    📄 文档读取支持：
+    - 单个文件：直接提供文件路径
+    - 目录：提供目录路径，会读取所有支持的文件
+    - 通配符：如 "*.py" 匹配所有Python文件
+    
+    📤 文档导出格式：
+    - 带标题：使用 "标题|内容" 格式
+    - 无标题：直接传入内容
+    
+    你可以智能判断用户需求，主动使用合适的工具组合。
     """.strip()
 
     model = ChatOpenAI(
@@ -115,7 +127,7 @@ if __name__ == "__main__":
 
     abot = Agent(model, tools, prompt)
 
-    print("🤖 AI助手已启动！输入 'quit' 或 'exit' 退出对话\n")
+    print("🤖 AI助手已启动！输入 'quit' 或 'exit'或者'q' 退出对话\n")
 
     state = {"messages":[]}
     while True:
