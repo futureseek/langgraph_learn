@@ -15,7 +15,7 @@
 
 - [ ] **文件操作工具**
   - [√] 文件输出工具 ：DocumentExporter
-  - [ ] 文件读取工具 (txt, csv, json)
+  - [√] 文件读取工具 (txt, csv, json)
   - [ ] PDF 文档处理
   - [ ] 文件搜索和管理
 

@@ -7,7 +7,7 @@ class MessagerManager:
     分层消息管理器
     """
  
-    def __init__(self, max_woking_memory=10, max_history=100):
+    def __init__(self, max_woking_memory=100, max_history=500):
         self.max_woking_memory = max_woking_memory
         self.max_history = max_history
         self.history = []
