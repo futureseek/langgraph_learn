@@ -10,6 +10,7 @@ from tools import MessagerManager
 from tools.TavilySearcher import create_tavily_search_reader_tool
 from tools.document_exporter import create_document_export_tool
 from tools.DocumentReader import create_document_reader_tool
+from tools.Path_Acquire import create_path_acquire_tool
 
 
 
@@ -709,7 +710,8 @@ def run_multi_agent_mode() -> bool:
     search_tool = create_tavily_search_reader_tool()
     document_export_tool = create_document_export_tool()
     document_reader_tool = create_document_reader_tool()
-    tools = [search_tool,document_export_tool, document_reader_tool]
+    path_ac_tool = create_path_acquire_tool()
+    tools = [search_tool,document_export_tool, document_reader_tool,path_ac_tool]
 
     model = ChatOpenAI(
         model="Qwen/Qwen3-Coder-480B-A35B-Instruct",
