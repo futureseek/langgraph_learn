@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "langchain-community>=0.3.27",
+    "langchain-mcp-adapters>=0.1.9",
     "langchain-openai>=0.3.29",
     "langchain-tavily>=0.2.11",
     "langgraph-cli[inmem]>=0.3.6",
