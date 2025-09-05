@@ -4,6 +4,7 @@ from typing import TypedDict, List, Dict, Any
 from typing_extensions import Annotated
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import InMemorySaver
 from agents.BaseAgent import BaseAgent,TaskEvaluatorAgent,TaskExecutorAgent,TaskPlannerAgent
 from agents.MessageManager import MessagerManager
 from agents.MultiAgentState import MultiAgentState
@@ -25,6 +26,9 @@ class MultiAgent:
         self.evaluator = TaskEvaluatorAgent(model, [])
         
         self.message_manager = MessagerManager(max_woking_memory=100, max_history=500)
+        
+        # 创建检查点保存器实现记忆功能
+        self.checkpointer = InMemorySaver()
         
         # 构建多智能体工作流图
         self.graph = self._build_workflow()
@@ -67,7 +71,7 @@ class MultiAgent:
         # 设置入口点
         workflow.set_entry_point("planner")
         
-        return workflow.compile()
+        return workflow.compile(checkpointer=self.checkpointer)
     
     def _planner_node(self, state: MultiAgentState) -> Dict:
         """任务规划节点"""
@@ -422,8 +426,8 @@ class MultiAgent:
         
         return False
     
-    def process_query(self, user_query: str) -> Dict:
-        """处理用户查询"""
+    def process_query(self, user_query: str, thread_id: str = "default") -> Dict:
+        """处理用户查询 - 支持会话记忆"""
         # 初始化状态
         initial_state = MultiAgentState(
             messages=[HumanMessage(content=user_query)],
@@ -443,9 +447,12 @@ class MultiAgent:
             current_tool_call_index=0
         )
         
-        # 运行工作流
+        # 配置会话记忆
+        config = {"configurable": {"thread_id": thread_id}}
+        
+        # 运行工作流，支持记忆功能
         final_state = initial_state
-        for output in self.graph.stream(initial_state):
+        for output in self.graph.stream(initial_state, config=config):
             if isinstance(output, dict):
                 final_state.update(output)
         
@@ -455,6 +462,8 @@ class MultiAgent:
 
 def run_multi_agent_mode() -> bool:
     """运行多智能体模式""" 
+    import uuid
+    
     # 创建工具列表
     search_tool = create_tavily_search_reader_tool()
     document_export_tool = create_document_export_tool()
@@ -471,29 +480,55 @@ def run_multi_agent_mode() -> bool:
     # 创建多智能体系统
     multi_agent = MultiAgent(model, tools)
 
+    # 生成会话ID，实现记忆功能
+    session_id = str(uuid.uuid4())[:8]  # 使用短的会话ID
+    
     print("🤖 多智能体协作系统已启动！")
     print("📋 系统包含三个专门化智能体：")
     print("   🎯 TaskPlanner - 任务拆解专家")
     print("   ⚡ TaskExecutor - 任务执行专家") 
     print("   🔍 TaskEvaluator - 结果评估专家")
-    print("\n输入 'quit' 或 'exit' 退出对话\n")
+    print(f"\n🧠 当前会话ID: {session_id} (支持记忆功能)")
+    print("📝 输入 'new' 创建新会话, '查看记忆' 查看对话历史")
+    print("输入 'quit' 或 'exit' 退出对话\n")
 
     while True:
         try:
-            user_input = input("👤 用户: ").strip()
+            user_input = input(f"👤 用户({session_id[:4]}): ").strip()
 
             if user_input.lower() in ['quit', 'exit', 'q']:
                 print("👋 再见！")
                 break
             if not user_input:
                 continue
+                
+            # 特殊命令处理
+            if user_input.lower() == 'new':
+                # 创建新会话
+                session_id = str(uuid.uuid4())[:8]
+                print(f"🆕 已创建新会话: {session_id}")
+                continue
+            elif user_input in ['查看记忆', 'memory', 'history']:
+                # 查看对话历史
+                try:
+                    config = {"configurable": {"thread_id": session_id}}
+                    history = multi_agent.checkpointer.list(config)
+                    if history:
+                        print(f"\n📜 会话 {session_id} 的历史记忆:")
+                        for i, checkpoint in enumerate(history):
+                            print(f"  {i+1}. 检查点 {checkpoint}")
+                    else:
+                        print(f"\n💭 会话 {session_id} 暂无历史记忆")
+                except Exception as e:
+                    print(f"\n⚠️ 无法获取历史记忆: {e}")
+                continue
 
             print(f"\n{'='*60}")
             print(f"🚀 开始处理任务: {user_input}")
             print(f"{'='*60}")
 
-            # 处理用户查询
-            final_state = multi_agent.process_query(user_input)
+            # 处理用户查询，传入会话ID
+            final_state = multi_agent.process_query(user_input, session_id)
 
             print(f"\n{'='*60}")
             print("✅ 任务处理完成！")
