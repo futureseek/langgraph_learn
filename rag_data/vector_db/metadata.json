@@ -1,0 +1,30 @@
+{
+  "documents": {
+    "C:\\Users\\a\\Desktop\\langgraph_learn\\test_document.md": {
+      "hash": "6ea9ad8a88550ff3a5639b13f13591ab",
+      "chunks": 2,
+      "processed_at": "C:\\Users\\a\\Desktop\\langgraph_learn"
+    },
+    "C:\\Users\\a\\Desktop\\langgraph_learn\\rag_usage_guide.md": {
+      "hash": "34958a1699121dc3e72509f2f142c82c",
+      "chunks": 1,
+      "processed_at": "C:\\Users\\a\\Desktop\\langgraph_learn"
+    },
+    "C:\\Users\\a\\Desktop\\langgraph_learn\\langgraph_project_documentation.md": {
+      "hash": "4180396f97a3243fbd871d8d36e469c2",
+      "chunks": 19,
+      "processed_at": "C:\\Users\\a\\Desktop\\langgraph_learn"
+    },
+    "C:\\Users\\a\\Desktop\\langgraph_learn\\doc\\中华人民共和国证券法(2019修订).pdf": {
+      "hash": "b089a9409b955a872e23760dc1a73f0f",
+      "chunks": 50,
+      "processed_at": "C:\\Users\\a\\Desktop\\langgraph_learn"
+    }
+  },
+  "collections": {},
+  "stats": {
+    "total_documents": 4,
+    "total_chunks": 72,
+    "last_updated": null
+  }
+}
