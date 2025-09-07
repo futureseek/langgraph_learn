@@ -552,7 +552,7 @@ def run_multi_agent_mode() -> bool:
     print("   📄 文档工具 - 文件读取和导出")
     print("   📁 路径工具 - 文件路径获取")
     print("   🧠 RAG工具 - 智能文档问答系统")
-    print("     • add_document_to_rag ./langgraph_project_documentation.md - 添加文档到知识库")
+    print("     • add_document_to_rag ./doc/中华人民共和国证券法(2019修订).pdf - 添加文档到知识库")
     print("     • add_directory_to_rag ./docs/ - 批量添加目录文档")
     print("     • rag_question_answer 您的问题 - 基于知识库问答")
     print("     • get_rag_stats - 查看知识库统计")

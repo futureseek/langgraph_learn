@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
 from .VectorDatabase import VectorDatabase, create_vector_database
-from .DocumentProcessor import DocumentProcessor, create_document_processor
+from .DocumentProcessor import DocumentProcessor, create_document_processor, create_api_client
 
 
 class RAGRetriever:
@@ -468,8 +468,19 @@ def create_rag_tools(model=None) -> List[Tool]:
     Returns:
         List[Tool]: RAG工具列表
     """
-    # 创建RAG检索器实例
-    rag_retriever = RAGRetriever(model=model)
+    # 创建基于 API 分割决策的 DocumentProcessor（优先使用环境变量配置）
+    api_key = os.getenv("OPENAI_API_KEY")
+    base_url = os.getenv("OPENAI_BASE_URL") or "https://api-inference.modelscope.cn/v1"
+    api_client, api_model = create_api_client(api_key=api_key, base_url=base_url, model_name="Qwen/Qwen3-1.7B")
+
+    doc_processor = create_document_processor(
+        meta_chunking_strategy="prob_subtract",  # 使用 API 决策（失败自动回退默认逻辑）
+        api_client=api_client,
+        api_model=api_model
+    )
+
+    # 创建RAG检索器实例（注入定制的文档处理器）
+    rag_retriever = RAGRetriever(model=model, doc_processor=doc_processor)
     
     def add_document_to_rag(file_path: str) -> str:
         """添加文档到RAG知识库"""

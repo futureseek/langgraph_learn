@@ -16,4 +16,7 @@ dependencies = [
     "langchain-chroma>=0.1.2",
     "pypdf>=4.0.1",
     "python-docx>=1.1.0",
+    "jieba==0.42.1",
+    "accelerate>=1.10.1",
+    "pymupdf>=1.26.4",
 ]
