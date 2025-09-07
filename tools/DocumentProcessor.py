@@ -20,6 +20,9 @@ from langchain.text_splitter import (
 )
 from langchain.docstore.document import Document
 
+# 导入文本规范化器
+from .text_normalizer import TextNormalizer
+
 # 尝试导入可选依赖
 try:
     import torch
@@ -637,7 +640,10 @@ class DocumentProcessor:
             self.meta_chunking = MetaChunking(meta_model, meta_tokenizer, api_client=api_client, api_model=api_model)
         else:
             self.meta_chunking = None
-    
+        
+        # 初始化文本规范化器
+        self.text_normalizer = TextNormalizer()
+        
     def process_file(self, file_path: str) -> List[Document]:
         """
         处理单个文件
@@ -747,18 +753,21 @@ class DocumentProcessor:
             if not text.strip():
                 return []
             
+            # 文本规范化
+            normalized_text = self.text_normalizer.normalize_text(text)
+            
             # 使用Meta-Chunking或默认分割器
             if self.meta_chunking and self.meta_chunking_strategy:
                 if self.meta_chunking_strategy == 'perplexity':
-                    chunks = self.meta_chunking.perplexity_chunking(text)
+                    chunks = self.meta_chunking.perplexity_chunking(normalized_text)
                 elif self.meta_chunking_strategy == 'prob_subtract':
-                    chunks = self.meta_chunking.prob_subtract_chunking(text)
+                    chunks = self.meta_chunking.prob_subtract_chunking(normalized_text)
                 elif self.meta_chunking_strategy == 'semantic':
-                    chunks = self.meta_chunking.semantic_chunking(text)
+                    chunks = self.meta_chunking.semantic_chunking(normalized_text)
                 else:
-                    chunks = self.text_splitter.split_text(text)
+                    chunks = self.text_splitter.split_text(normalized_text)
             else:
-                chunks = self.text_splitter.split_text(text)
+                chunks = self.text_splitter.split_text(normalized_text)
             
             # 创建文档对象
             documents = []
@@ -794,18 +803,21 @@ class DocumentProcessor:
         else:
             raise ValueError(f"无法解码文件: {file_path}")
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -814,18 +826,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.markdown_splitter.split_text(content)
+                chunks = self.markdown_splitter.split_text(normalized_content)
         else:
-            chunks = self.markdown_splitter.split_text(content)
+            chunks = self.markdown_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -834,18 +849,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.code_splitter.split_text(content)
+                chunks = self.code_splitter.split_text(normalized_content)
         else:
-            chunks = self.code_splitter.split_text(content)
+            chunks = self.code_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -854,18 +872,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -874,18 +895,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -894,18 +918,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -919,18 +946,21 @@ class DocumentProcessor:
         content = re.sub(r'<[^>]+>', '', content)
         content = re.sub(r'\s+', ' ', content).strip()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -939,18 +969,21 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -967,18 +1000,21 @@ class DocumentProcessor:
                 f.seek(0)
                 content = f.read()
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -1000,18 +1036,21 @@ class DocumentProcessor:
         
         content = "\n".join(content_lines)
         
+        # 文本规范化
+        normalized_content = self.text_normalizer.normalize_text(content)
+        
         # 使用Meta-Chunking或默认分割器
         if self.meta_chunking and self.meta_chunking_strategy:
             if self.meta_chunking_strategy == 'perplexity':
-                chunks = self.meta_chunking.perplexity_chunking(content)
+                chunks = self.meta_chunking.perplexity_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'prob_subtract':
-                chunks = self.meta_chunking.prob_subtract_chunking(content)
+                chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
             elif self.meta_chunking_strategy == 'semantic':
-                chunks = self.meta_chunking.semantic_chunking(content)
+                chunks = self.meta_chunking.semantic_chunking(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
         else:
-            chunks = self.text_splitter.split_text(content)
+            chunks = self.text_splitter.split_text(normalized_content)
         
         return self._create_documents(chunks, base_metadata)
     
@@ -1031,18 +1070,21 @@ class DocumentProcessor:
             if not content.strip():
                 raise ValueError("PDF文件无法提取文本内容")
             
+            # 文本规范化
+            normalized_content = self.text_normalizer.normalize_text(content)
+            
             # 使用Meta-Chunking或默认分割器
             if self.meta_chunking and self.meta_chunking_strategy:
                 if self.meta_chunking_strategy == 'perplexity':
-                    chunks = self.meta_chunking.perplexity_chunking(content)
+                    chunks = self.meta_chunking.perplexity_chunking(normalized_content)
                 elif self.meta_chunking_strategy == 'prob_subtract':
-                    chunks = self.meta_chunking.prob_subtract_chunking(content)
+                    chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
                 elif self.meta_chunking_strategy == 'semantic':
-                    chunks = self.meta_chunking.semantic_chunking(content)
+                    chunks = self.meta_chunking.semantic_chunking(normalized_content)
                 else:
-                    chunks = self.text_splitter.split_text(content)
+                    chunks = self.text_splitter.split_text(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
             
             return self._create_documents(chunks, base_metadata)
             
@@ -1070,18 +1112,21 @@ class DocumentProcessor:
             if not content.strip():
                 raise ValueError("Word文档无法提取文本内容")
             
+            # 文本规范化
+            normalized_content = self.text_normalizer.normalize_text(content)
+            
             # 使用Meta-Chunking或默认分割器
             if self.meta_chunking and self.meta_chunking_strategy:
                 if self.meta_chunking_strategy == 'perplexity':
-                    chunks = self.meta_chunking.perplexity_chunking(content)
+                    chunks = self.meta_chunking.perplexity_chunking(normalized_content)
                 elif self.meta_chunking_strategy == 'prob_subtract':
-                    chunks = self.meta_chunking.prob_subtract_chunking(content)
+                    chunks = self.meta_chunking.prob_subtract_chunking(normalized_content)
                 elif self.meta_chunking_strategy == 'semantic':
-                    chunks = self.meta_chunking.semantic_chunking(content)
+                    chunks = self.meta_chunking.semantic_chunking(normalized_content)
                 else:
-                    chunks = self.text_splitter.split_text(content)
+                    chunks = self.text_splitter.split_text(normalized_content)
             else:
-                chunks = self.text_splitter.split_text(content)
+                chunks = self.text_splitter.split_text(normalized_content)
             
             return self._create_documents(chunks, base_metadata)
             
