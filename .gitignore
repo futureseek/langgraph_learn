@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+exports/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+
+test.py
+test_ollama.py
+jsonl_to_json.py
+rag_data/vector_db/
