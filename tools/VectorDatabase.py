@@ -61,6 +61,7 @@ class VectorDatabase:
             self.collection = self.client.get_collection(name=collection_name)
             print(f"✅ 已连接到现有集合: {collection_name}")
         except Exception:
+            # 创建一个集合，用余弦相似度搜索
             self.collection = self.client.create_collection(
                 name=collection_name,
                 metadata={"hnsw:space": "cosine"}
@@ -130,6 +131,18 @@ class VectorDatabase:
                 print("⚠️ 没有文档需要添加")
                 return False
             
+            # ✅ 确保持久化目录存在
+            self.persist_directory.mkdir(parents=True, exist_ok=True)
+            # ✅ 确保 collection 已初始化
+            if not hasattr(self, "collection") or self.collection is None:
+                try:
+                    self.collection = self.client.get_collection(name=self.collection_name)
+                except Exception:
+                    self.collection = self.client.create_collection(
+                        name=self.collection_name,
+                        metadata={"hnsw:space": "cosine"}
+                    )
+                    
             # 检查文件是否已更新
             if source_file and os.path.exists(source_file):
                 file_hash = self._calculate_file_hash(source_file)
@@ -310,24 +323,48 @@ class VectorDatabase:
             return False
     
     def clear_all(self) -> bool:
-        """清空所有数据"""
+        """彻底清空所有数据，包括 collection 和 SQLite 文件"""
         try:
-            # 重新创建集合
-            self.client.delete_collection(name=self.collection_name)
+            # 先尝试删除集合（逻辑层）
+            try:
+                self.client.delete_collection(name=self.collection_name)
+            except Exception:
+                pass  # 集合可能不存在，忽略
+
+            self.close()
+            # 1️⃣ 删除整个持久化目录
+            if self.persist_directory.exists():
+                import shutil
+                shutil.rmtree(self.persist_directory)
+                print(f"🗑️ 已删除持久化目录: {self.persist_directory}")
+
+            # 2️⃣ 重新创建持久化目录
+            self.persist_directory.mkdir(parents=True, exist_ok=True)
+
+            # 3️⃣ 重建 ChromaDB 客户端
+            self.client = chromadb.PersistentClient(
+                path=str(self.persist_directory),
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+
+            # 4️⃣ 重新创建 collection
             self.collection = self.client.create_collection(
                 name=self.collection_name,
                 metadata={"hnsw:space": "cosine"}
             )
-            
-            # 重新初始化向量存储
+
+            # 5️⃣ 重新初始化向量存储
             self.vector_store = Chroma(
                 client=self.client,
                 collection_name=self.collection_name,
                 embedding_function=self.embeddings,
                 persist_directory=str(self.persist_directory)
             )
-            
-            # 清空元数据
+
+            # 6️⃣ 清空元数据并保存
             self.metadata = {
                 "documents": {},
                 "collections": {},
@@ -338,14 +375,28 @@ class VectorDatabase:
                 }
             }
             self._save_metadata()
-            
-            print("✅ 已清空所有数据")
+
+            print("✅ 已彻底清空所有数据，包括 SQLite 文件和 collection")
             return True
-            
+
         except Exception as e:
             print(f"❌ 清空数据失败: {e}")
             return False
-
+        
+    def close(self):
+        """
+        主动释放/关闭 Chroma 客户端，解除 SQLite 文件锁。
+        """
+        try:
+            # Chroma 的 PersistentClient 没有显式 close 方法
+            # 所以可以用 del + 强制 GC 触发关闭
+            import gc
+            del self.client
+            del self.collection
+            gc.collect()
+            print("VectorDatabase 已关闭，SQLite 文件锁已释放。")
+        except Exception as e:
+            print(f"关闭 VectorDatabase 出错: {e}")
 
 def create_vector_database(persist_directory: str = "./rag_data/vector_db",
                           collection_name: str = "documents") -> VectorDatabase:

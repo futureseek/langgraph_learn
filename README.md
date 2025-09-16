@@ -21,7 +21,26 @@
 git clone <项目地址>
 cd langgraph_learn
 ```
-
+2. **配置ollama**
+- 下载并安装 Ollama: 
+访问 [Ollama 官网](https://ollama.com/) 下载并安装适用于你操作系统的 Ollama 软件。
+- 配置模型: 
+运行以下命令拉取所需模型：
+```shell
+ollama pull qwen3:1.7b
+ollama pull embeddinggemma:300m
+```
+- 设置ollama并发：
+编辑账号的环境变量--环境变量 打开环境变量设置，在用户环境变量中我们增加以上2个属性
+```shell
+OLLAMA_NUM_PARALLEL = 2
+OLLAMA_MAX_LOADED_MODELS = 2
+```
+- 运行ollama服务：
+```shell
+ollama run qwen3:1.7b
+ollama run embeddinggemma:300m
+```
 2. **检查uv版本**
 ```shell
 uv --version

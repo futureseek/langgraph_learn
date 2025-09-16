@@ -13,7 +13,7 @@ from tools.document_exporter import create_document_export_tool
 from tools.DocumentReader import create_document_reader_tool
 from tools.Path_Acquire import create_path_acquire_tool
 from tools.RAGRetriever import create_rag_tools
-
+from tools.clean_think import clean_response
 
 # 多智能体管理器
 class MultiAgent:
@@ -93,9 +93,34 @@ class MultiAgent:
             # 检查是否包含工具名称
             for tool_name in available_tools.keys():
                 if tool_name in user_query:
+                    # 尝试提取参数
+                    params = {}
+                    tool_part = user_query.split(tool_name, 1)[1].strip() # 获取工具名后的部分
+                    if tool_part:
+                        # 简单处理：如果后面跟的是文件路径或简单字符串，作为主要参数
+                        # 这里可以根据工具的具体需求进行更复杂的解析
+                        # 例如，对于 add_document_to_rag，期望一个 file_path 参数
+                        # 对于 rag_question_answer，期望一个 question 参数
+                        # 我们可以做一个通用的处理，把剩余部分作为 'input' 参数
+                        # 或者根据工具名做特定处理
+                        if tool_name == "rag_question_answer":
+                             # 对于 rag_question_answer，剩余部分是问题
+                             params["question"] = tool_part
+                        elif tool_name in ["add_document_to_rag", "add_directory_to_rag", "delete_rag_document"]:
+                            # 对于这些工具，剩余部分很可能是路径
+                            # 移除可能的引号
+                            path = tool_part.strip('\'"')
+                            params["file_path"] = path # 注意：add_directory_to_rag 实际需要 directory_path, 这里简化处理或需要更精确的映射
+                        elif tool_name == "export_document":
+                            # 对于 export_document，剩余部分可能是内容
+                            params["content"] = tool_part
+                        else:
+                            # 通用处理，将剩余部分作为 'input' 参数
+                            params["input"] = tool_part
+                    
                     direct_tool_call = {
                         'name': tool_name,
-                        'params': {},
+                        'params': params, # 使用解析出的参数
                         'step': 1
                     }
                     break
@@ -110,7 +135,8 @@ class MultiAgent:
             # 正常AI规划流程
             result = self.planner.process(state)
             response = result["response"]
-            
+            # 输出加工
+            clean_response(response)
             # 分析任务计划中需要的工具调用
             planned_tool_calls = self._extract_planned_tool_calls(response.content)
             planned_tools = list(set([call['name'] for call in planned_tool_calls]))  # 去重获取工具名称列表
@@ -194,6 +220,8 @@ class MultiAgent:
             
             result = self.executor.process(temp_state)
             response = result["response"]
+            # 输出加工
+            clean_response(response)
             
             # 添加指导消息到状态
             state["messages"].append(guidance_message)
@@ -296,7 +324,8 @@ class MultiAgent:
         
         result = self.evaluator.process(state)
         response = result["response"]
-        
+        # 输出加工
+        clean_response(response)
         # 更新状态
         state["messages"].append(response)
         state["current_agent"] = self.evaluator.name
