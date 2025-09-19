@@ -16,4 +16,11 @@ exports/
 *.iml
 
 
+<<<<<<< HEAD
 test.py
+=======
+test.py
+test_ollama.py
+jsonl_to_json.py
+rag_data/vector_db/
+>>>>>>> ollama_use_meta_chunk

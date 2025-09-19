@@ -5,3 +5,7 @@ from .BaseAgent import BaseAgent,TaskPlannerAgent,TaskExecutorAgent,TaskEvaluato
 
 __all__ = ["MessagerManager","BaseAgent","MultiAgentState","TaskPlannerAgent","TaskExecutorAgent","TaskEvaluatorAgent"]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ollama_use_meta_chunk

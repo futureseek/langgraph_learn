@@ -11,4 +11,17 @@ dependencies = [
     "langchain-tavily>=0.2.11",
     "langgraph-cli[inmem]>=0.3.6",
     "openai>=1.99.6",
+<<<<<<< HEAD
+=======
+    "chromadb>=0.4.22",
+    "sentence-transformers>=2.2.2",
+    "langchain-chroma>=0.1.2",
+    "pypdf>=4.0.1",
+    "python-docx>=1.1.0",
+    "jieba==0.42.1",
+    "accelerate>=1.10.1",
+    "pymupdf>=1.26.4",
+    "langchain-huggingface>=0.1.0",
+    "langchain-chroma>=0.1.0",
+>>>>>>> ollama_use_meta_chunk
 ]

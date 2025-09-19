@@ -12,7 +12,12 @@ from tools.TavilySearcher import create_tavily_search_reader_tool
 from tools.document_exporter import create_document_export_tool
 from tools.DocumentReader import create_document_reader_tool
 from tools.Path_Acquire import create_path_acquire_tool
+<<<<<<< HEAD
 
+=======
+from tools.RAGRetriever import create_rag_tools
+from tools.clean_think import clean_response
+>>>>>>> ollama_use_meta_chunk
 
 # 多智能体管理器
 class MultiAgent:
@@ -27,9 +32,12 @@ class MultiAgent:
         
         self.message_manager = MessagerManager(max_woking_memory=100, max_history=500)
         
+<<<<<<< HEAD
         # 创建检查点保存器实现记忆功能
         self.checkpointer = InMemorySaver()
         
+=======
+>>>>>>> ollama_use_meta_chunk
         # 构建多智能体工作流图
         self.graph = self._build_workflow()
     
@@ -71,25 +79,102 @@ class MultiAgent:
         # 设置入口点
         workflow.set_entry_point("planner")
         
+<<<<<<< HEAD
         return workflow.compile(checkpointer=self.checkpointer)
+=======
+        return workflow.compile()
+>>>>>>> ollama_use_meta_chunk
     
     def _planner_node(self, state: MultiAgentState) -> Dict:
         """任务规划节点"""
         print(f"\n🎯 {self.planner.name} 开始分析任务...")
         
+<<<<<<< HEAD
         result = self.planner.process(state)
         response = result["response"]
         
         # 分析任务计划中需要的工具调用
         planned_tool_calls = self._extract_planned_tool_calls(response.content)
         planned_tools = list(set([call['name'] for call in planned_tool_calls]))  # 去重获取工具名称列表
+=======
+        # 获取用户查询
+        user_query = state.get("user_query", "")
+        
+        # 直接检查是否是工具调用
+        available_tools = {tool.name: tool for tool in self.tools}
+        direct_tool_call = None
+        
+        # 检查用户查询是否直接是工具名称
+        if user_query.strip() in available_tools:
+            direct_tool_call = {
+                'name': user_query.strip(),
+                'params': {},
+                'step': 1
+            }
+        else:
+            # 检查是否包含工具名称
+            for tool_name in available_tools.keys():
+                if tool_name in user_query:
+                    # 尝试提取参数
+                    params = {}
+                    tool_part = user_query.split(tool_name, 1)[1].strip() # 获取工具名后的部分
+                    if tool_part:
+                        # 简单处理：如果后面跟的是文件路径或简单字符串，作为主要参数
+                        # 这里可以根据工具的具体需求进行更复杂的解析
+                        # 例如，对于 add_document_to_rag，期望一个 file_path 参数
+                        # 对于 rag_question_answer，期望一个 question 参数
+                        # 我们可以做一个通用的处理，把剩余部分作为 'input' 参数
+                        # 或者根据工具名做特定处理
+                        if tool_name == "rag_question_answer":
+                             # 对于 rag_question_answer，剩余部分是问题
+                             params["question"] = tool_part
+                        elif tool_name in ["add_document_to_rag", "add_directory_to_rag", "delete_rag_document"]:
+                            # 对于这些工具，剩余部分很可能是路径
+                            # 移除可能的引号
+                            path = tool_part.strip('\'"')
+                            params["file_path"] = path # 注意：add_directory_to_rag 实际需要 directory_path, 这里简化处理或需要更精确的映射
+                        elif tool_name == "export_document":
+                            # 对于 export_document，剩余部分可能是内容
+                            params["content"] = tool_part
+                        else:
+                            # 通用处理，将剩余部分作为 'input' 参数
+                            params["input"] = tool_part
+                    
+                    direct_tool_call = {
+                        'name': tool_name,
+                        'params': params, # 使用解析出的参数
+                        'step': 1
+                    }
+                    break
+        
+        if direct_tool_call:
+            # 直接工具调用，跳过AI规划
+            response_content = f"直接调用工具: {direct_tool_call['name']}"
+            response = AIMessage(content=response_content)
+            planned_tool_calls = [direct_tool_call]
+            planned_tools = [direct_tool_call['name']]
+        else:
+            # 正常AI规划流程
+            result = self.planner.process(state)
+            response = result["response"]
+            # 输出加工
+            clean_response(response)
+            # 分析任务计划中需要的工具调用
+            planned_tool_calls = self._extract_planned_tool_calls(response.content)
+            planned_tools = list(set([call['name'] for call in planned_tool_calls]))  # 去重获取工具名称列表
+>>>>>>> ollama_use_meta_chunk
         
         # 更新状态
         state["messages"].append(response)
         state["current_agent"] = self.planner.name
         state["task_plan"] = response.content
         state["step"] = "planning_complete"
+<<<<<<< HEAD
         state["agent_history"].append(result["agent_record"])
+=======
+        if not direct_tool_call:
+            state["agent_history"].append(result["agent_record"])
+>>>>>>> ollama_use_meta_chunk
         state["planned_tools"] = planned_tools
         state["executed_tools"] = []
         state["planned_tool_calls"] = planned_tool_calls
@@ -162,6 +247,11 @@ class MultiAgent:
             
             result = self.executor.process(temp_state)
             response = result["response"]
+<<<<<<< HEAD
+=======
+            # 输出加工
+            clean_response(response)
+>>>>>>> ollama_use_meta_chunk
             
             # 添加指导消息到状态
             state["messages"].append(guidance_message)
@@ -209,14 +299,30 @@ class MultiAgent:
                 
                 if tool_call['name'] in self.executor.tools:
                     try:
+<<<<<<< HEAD
                         result = self.executor.tools[tool_call['name']].invoke(tool_call['args'])
+=======
+                        # 对于无参数的工具，传入空字符串
+                        if not tool_call['args'] or tool_call['args'] == {}:
+                            result = self.executor.tools[tool_call['name']].invoke("")
+                        else:
+                            result = self.executor.tools[tool_call['name']].invoke(tool_call['args'])
+>>>>>>> ollama_use_meta_chunk
                         tool_results.append(ToolMessage(
                             tool_call_id=tool_call['id'],
                             name=tool_call['name'],
                             content=str(result)
                         ))
                         print(f"✅ 工具 {tool_call['name']} 执行成功")
+<<<<<<< HEAD
                         print(f"工具结果: {str(result)[:200]}...")
+=======
+                        # 对于 get_rag_stats 工具，显示完整结果
+                        if tool_call['name'] == 'get_rag_stats':
+                            print(f"工具结果:\n{str(result)}")
+                        else:
+                            print(f"工具结果: {str(result)[:500]}...")
+>>>>>>> ollama_use_meta_chunk
                     except Exception as e:
                         tool_results.append(ToolMessage(
                             tool_call_id=tool_call['id'],
@@ -256,7 +362,12 @@ class MultiAgent:
         
         result = self.evaluator.process(state)
         response = result["response"]
+<<<<<<< HEAD
         
+=======
+        # 输出加工
+        clean_response(response)
+>>>>>>> ollama_use_meta_chunk
         # 更新状态
         state["messages"].append(response)
         state["current_agent"] = self.evaluator.name
@@ -351,6 +462,30 @@ class MultiAgent:
                         'step': len(tool_calls) + 1
                     })
         
+<<<<<<< HEAD
+=======
+        # 方法3：直接匹配用户输入中的工具名称（新增）
+        if not tool_calls:
+            user_input = task_plan.strip()
+            # 检查用户输入是否直接是工具名称
+            if user_input in available_tools:
+                tool_calls.append({
+                    'name': user_input,
+                    'params': {},
+                    'step': 1
+                })
+            else:
+                # 检查是否包含工具名称
+                for tool_name in available_tools.keys():
+                    if tool_name in user_input:
+                        tool_calls.append({
+                            'name': tool_name,
+                            'params': {},
+                            'step': len(tool_calls) + 1
+                        })
+                        break
+        
+>>>>>>> ollama_use_meta_chunk
         print(f"🔍 从任务计划中提取的工具调用: {len(tool_calls)} 个")
         for i, call in enumerate(tool_calls, 1):
             print(f"   {i}. {call['name']}({call['params']})")
@@ -426,8 +561,13 @@ class MultiAgent:
         
         return False
     
+<<<<<<< HEAD
     def process_query(self, user_query: str, thread_id: str = "default") -> Dict:
         """处理用户查询 - 支持会话记忆"""
+=======
+    def process_query(self, user_query: str) -> Dict:
+        """处理用户查询"""
+>>>>>>> ollama_use_meta_chunk
         # 初始化状态
         initial_state = MultiAgentState(
             messages=[HumanMessage(content=user_query)],
@@ -447,12 +587,18 @@ class MultiAgent:
             current_tool_call_index=0
         )
         
+<<<<<<< HEAD
         # 配置会话记忆
         config = {"configurable": {"thread_id": thread_id}}
         
         # 运行工作流，支持记忆功能
         final_state = initial_state
         for output in self.graph.stream(initial_state, config=config):
+=======
+        # 运行工作流
+        final_state = initial_state
+        for output in self.graph.stream(initial_state):
+>>>>>>> ollama_use_meta_chunk
             if isinstance(output, dict):
                 final_state.update(output)
         
@@ -462,13 +608,19 @@ class MultiAgent:
 
 def run_multi_agent_mode() -> bool:
     """运行多智能体模式""" 
+<<<<<<< HEAD
     import uuid
     
     # 创建工具列表
+=======
+    # 创建工具列表
+    print("创建工具列表")
+>>>>>>> ollama_use_meta_chunk
     search_tool = create_tavily_search_reader_tool()
     document_export_tool = create_document_export_tool()
     document_reader_tool = create_document_reader_tool()
     path_ac_tool = create_path_acquire_tool()
+<<<<<<< HEAD
     tools = [search_tool,document_export_tool, document_reader_tool,path_ac_tool]
 
     model = ChatOpenAI(
@@ -483,11 +635,38 @@ def run_multi_agent_mode() -> bool:
     # 生成会话ID，实现记忆功能
     session_id = str(uuid.uuid4())[:8]  # 使用短的会话ID
     
+=======
+    print("创建工具列表完成")
+    # 创建模型实例
+    model = ChatOpenAI(
+            # model='Qwen/Qwen3-1.7B',
+            # base_url='https://api-inference.modelscope.cn/v1',
+            # api_key='ms-8b59067c-75ff-4b83-900e-26e00e46c531',
+            # streaming=True  # 使用流式调用，可能不需要enable_thinking参数
+            
+            model='qwen3:1.7b',
+            base_url='http://localhost:11434/v1',
+            api_key='ollama',
+            streaming=True
+        )
+        
+    # 创建RAG工具（传入模型实例）
+    print("创建RAG工具")
+    rag_tools = create_rag_tools(model=model)
+    print("创建RAG工具完成")
+    # 合并所有工具
+    tools = [search_tool, document_export_tool, document_reader_tool, path_ac_tool] + rag_tools
+    
+    # 创建多智能体系统
+    multi_agent = MultiAgent(model, tools)
+
+>>>>>>> ollama_use_meta_chunk
     print("🤖 多智能体协作系统已启动！")
     print("📋 系统包含三个专门化智能体：")
     print("   🎯 TaskPlanner - 任务拆解专家")
     print("   ⚡ TaskExecutor - 任务执行专家") 
     print("   🔍 TaskEvaluator - 结果评估专家")
+<<<<<<< HEAD
     print(f"\n🧠 当前会话ID: {session_id} (支持记忆功能)")
     print("📝 输入 'new' 创建新会话, '查看记忆' 查看对话历史")
     print("输入 'quit' 或 'exit' 退出对话\n")
@@ -495,12 +674,31 @@ def run_multi_agent_mode() -> bool:
     while True:
         try:
             user_input = input(f"👤 用户({session_id[:4]}): ").strip()
+=======
+    print("\n🛠️ 可用工具：")
+    print("   🔍 搜索工具 - 网络信息检索")
+    print("   📄 文档工具 - 文件读取和导出")
+    print("   📁 路径工具 - 文件路径获取")
+    print("   🧠 RAG工具 - 智能文档问答系统")
+    print("     • add_document_to_rag ./doc/中华人民共和国证券法(2019修订).pdf - 添加文档到知识库")
+    print("     • add_directory_to_rag ./docs/ - 批量添加目录文档")
+    print("     • rag_question_answer 您的问题 - 基于知识库问答")
+    print("     • get_rag_stats - 查看知识库统计")
+    print("     • delete_rag_document ./path/to/file.md - 删除指定文档")
+    print("     • clear_rag_knowledge_base - 清空整个知识库")
+    print("\n输入 'quit' 或 'exit' 退出对话\n")
+
+    while True:
+        try:
+            user_input = input("👤 用户: ").strip()
+>>>>>>> ollama_use_meta_chunk
 
             if user_input.lower() in ['quit', 'exit', 'q']:
                 print("👋 再见！")
                 break
             if not user_input:
                 continue
+<<<<<<< HEAD
                 
             # 特殊命令处理
             if user_input.lower() == 'new':
@@ -522,13 +720,20 @@ def run_multi_agent_mode() -> bool:
                 except Exception as e:
                     print(f"\n⚠️ 无法获取历史记忆: {e}")
                 continue
+=======
+>>>>>>> ollama_use_meta_chunk
 
             print(f"\n{'='*60}")
             print(f"🚀 开始处理任务: {user_input}")
             print(f"{'='*60}")
 
+<<<<<<< HEAD
             # 处理用户查询，传入会话ID
             final_state = multi_agent.process_query(user_input, session_id)
+=======
+            # 处理用户查询
+            final_state = multi_agent.process_query(user_input)
+>>>>>>> ollama_use_meta_chunk
 
             print(f"\n{'='*60}")
             print("✅ 任务处理完成！")
