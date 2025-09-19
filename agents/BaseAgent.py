@@ -3,12 +3,8 @@ from .MultiAgentState import MultiAgentState
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIMessage, ToolMessage
 from typing import TypedDict, List, Dict, Any
 from datetime import datetime
-<<<<<<< HEAD
-
-=======
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
->>>>>>> ollama_use_meta_chunk
 
 
 class BaseAgent:
@@ -21,16 +17,10 @@ class BaseAgent:
         self.system_prompt = system_prompt
         self.model = model
         self.tools = {t.name: t for t in (tools or [])}
-<<<<<<< HEAD
-        self.message_manager = MessagerManager(max_woking_memory=50, max_history=200)
-        for name in tools:
-            print(name)
-=======
         checkpointer = InMemorySaver()
         self.message_manager = MessagerManager(max_woking_memory=50, max_history=200)
         # for name in tools:
         #     print(name)    # 输出工具名称
->>>>>>> ollama_use_meta_chunk
         
         # 如果有工具，绑定到模型
         if tools:
@@ -40,12 +30,8 @@ class BaseAgent:
         """获取智能体的上下文信息"""
         # 使用 MessageManager 智能管理消息
         all_messages = state["messages"]
-<<<<<<< HEAD
-        if len(all_messages) > 10:  # 只有消息较多时才使用 MessageManager
-=======
         if len(all_messages) > 100:  # 只有消息较多时才使用 MessageManager
             print("使用 MessageManager 智能管理消息")
->>>>>>> ollama_use_meta_chunk
             managed_messages = self.message_manager([], all_messages[-20:])  # 从最近20条中智能选择
         else:
             managed_messages = all_messages

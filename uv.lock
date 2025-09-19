@@ -7,8 +7,6 @@ resolution-markers = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "accelerate"
 version = "1.10.1"
 source = { registry = "https://pypi.org/simple" }
@@ -27,7 +25,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -133,8 +130,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "backoff"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -194,7 +189,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "blockbuster"
 version = "1.5.25"
 source = { registry = "https://pypi.org/simple" }
@@ -207,8 +201,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "build"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -232,7 +224,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "certifi"
 version = "2025.8.3"
 source = { registry = "https://pypi.org/simple" }
@@ -317,8 +308,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "chromadb"
 version = "1.0.20"
 source = { registry = "https://pypi.org/simple" }
@@ -361,7 +350,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "click"
 version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -392,8 +380,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "coloredlogs"
 version = "15.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -406,7 +392,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "cryptography"
 version = "44.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -464,8 +449,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "durationpy"
 version = "0.10"
 source = { registry = "https://pypi.org/simple" }
@@ -493,7 +476,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "forbiddenfruit"
 version = "0.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -560,8 +542,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "fsspec"
 version = "2025.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -597,7 +577,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "greenlet"
 version = "3.2.4"
 source = { registry = "https://pypi.org/simple" }
@@ -631,8 +610,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "grpcio"
 version = "1.74.0"
 source = { registry = "https://pypi.org/simple" }
@@ -661,7 +638,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -671,8 +647,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "hf-xet"
 version = "1.1.9"
 source = { registry = "https://pypi.org/simple" }
@@ -688,7 +662,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "httpcore"
 version = "1.0.9"
 source = { registry = "https://pypi.org/simple" }
@@ -702,8 +675,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "httptools"
 version = "0.6.4"
 source = { registry = "https://pypi.org/simple" }
@@ -726,7 +697,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "httpx"
 version = "0.28.1"
 source = { registry = "https://pypi.org/simple" }
@@ -751,8 +721,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "huggingface-hub"
 version = "0.34.4"
 source = { registry = "https://pypi.org/simple" }
@@ -784,7 +752,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "idna"
 version = "3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -794,8 +761,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "importlib-metadata"
 version = "8.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -835,7 +800,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "jiter"
 version = "0.10.0"
 source = { registry = "https://pypi.org/simple" }
@@ -884,8 +848,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "joblib"
 version = "1.5.2"
 source = { registry = "https://pypi.org/simple" }
@@ -895,7 +857,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "jsonpatch"
 version = "1.33"
 source = { registry = "https://pypi.org/simple" }
@@ -966,8 +927,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "kubernetes"
 version = "33.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -990,7 +949,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "langchain"
 version = "0.3.27"
 source = { registry = "https://pypi.org/simple" }
@@ -1009,8 +967,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "langchain-chroma"
 version = "0.2.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1025,7 +981,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "langchain-community"
 version = "0.3.27"
 source = { registry = "https://pypi.org/simple" }
@@ -1067,8 +1022,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "langchain-huggingface"
 version = "0.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1083,7 +1036,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "langchain-mcp-adapters"
 version = "0.1.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1223,35 +1175,25 @@ name = "langgraph-learn"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-<<<<<<< HEAD
-    { name = "langchain-community" },
-=======
     { name = "accelerate" },
     { name = "chromadb" },
     { name = "jieba" },
     { name = "langchain-chroma" },
     { name = "langchain-community" },
     { name = "langchain-huggingface" },
->>>>>>> ollama_use_meta_chunk
     { name = "langchain-mcp-adapters" },
     { name = "langchain-openai" },
     { name = "langchain-tavily" },
     { name = "langgraph-cli", extra = ["inmem"] },
     { name = "openai" },
-<<<<<<< HEAD
-=======
     { name = "pymupdf" },
     { name = "pypdf" },
     { name = "python-docx" },
     { name = "sentence-transformers" },
->>>>>>> ollama_use_meta_chunk
 ]
 
 [package.metadata]
 requires-dist = [
-<<<<<<< HEAD
-    { name = "langchain-community", specifier = ">=0.3.27" },
-=======
     { name = "accelerate", specifier = ">=1.10.1" },
     { name = "chromadb", specifier = ">=0.4.22" },
     { name = "jieba", specifier = "==0.42.1" },
@@ -1259,19 +1201,15 @@ requires-dist = [
     { name = "langchain-chroma", specifier = ">=0.1.2" },
     { name = "langchain-community", specifier = ">=0.3.27" },
     { name = "langchain-huggingface", specifier = ">=0.1.0" },
->>>>>>> ollama_use_meta_chunk
     { name = "langchain-mcp-adapters", specifier = ">=0.1.9" },
     { name = "langchain-openai", specifier = ">=0.3.29" },
     { name = "langchain-tavily", specifier = ">=0.2.11" },
     { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.3.6" },
     { name = "openai", specifier = ">=1.99.6" },
-<<<<<<< HEAD
-=======
     { name = "pymupdf", specifier = ">=1.26.4" },
     { name = "pypdf", specifier = ">=4.0.1" },
     { name = "python-docx", specifier = ">=1.1.0" },
     { name = "sentence-transformers", specifier = ">=2.2.2" },
->>>>>>> ollama_use_meta_chunk
 ]
 
 [[package]]
@@ -1336,8 +1274,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "lxml"
 version = "6.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1450,7 +1386,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "marshmallow"
 version = "3.26.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1485,8 +1420,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "mdurl"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1585,7 +1518,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "multidict"
 version = "6.6.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1658,8 +1590,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "networkx"
 version = "3.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1669,7 +1599,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "numpy"
 version = "2.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1733,8 +1662,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "nvidia-cublas-cu12"
 version = "12.8.4.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1895,7 +1822,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "openai"
 version = "1.99.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1915,8 +1841,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "opentelemetry-api"
 version = "1.36.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1999,7 +1923,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "orjson"
 version = "3.11.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2073,8 +1996,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "overrides"
 version = "7.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2084,7 +2005,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "packaging"
 version = "25.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2094,8 +2014,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pillow"
 version = "11.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2178,7 +2096,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "propcache"
 version = "0.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2236,8 +2153,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "protobuf"
 version = "6.32.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2399,7 +2314,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "pycparser"
 version = "2.22"
 source = { registry = "https://pypi.org/simple" }
@@ -2480,8 +2394,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2491,7 +2403,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "pyjwt"
 version = "2.10.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2501,8 +2412,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "pymupdf"
 version = "1.26.4"
 source = { registry = "https://pypi.org/simple" }
@@ -2576,7 +2485,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "python-dotenv"
 version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2716,8 +2624,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "requests-oauthlib"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2731,7 +2637,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "requests-toolbelt"
 version = "1.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2744,8 +2649,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "rich"
 version = "14.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2759,7 +2662,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "rpds-py"
 version = "0.27.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2841,8 +2743,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "rsa"
 version = "4.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3008,7 +2908,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "sniffio"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3083,8 +2982,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "sympy"
 version = "1.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3097,7 +2994,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "tenacity"
 version = "9.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -3107,8 +3003,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "threadpoolctl"
 version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3118,7 +3012,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "tiktoken"
 version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3143,8 +3036,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "tokenizers"
 version = "0.22.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3213,7 +3104,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "tqdm"
 version = "4.67.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3226,8 +3116,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "transformers"
 version = "4.56.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3262,7 +3150,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "truststore"
 version = "0.10.3"
 source = { registry = "https://pypi.org/simple" }
@@ -3272,8 +3159,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "typer"
 version = "0.17.4"
 source = { registry = "https://pypi.org/simple" }
@@ -3289,7 +3174,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "typing-extensions"
 version = "4.14.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3345,8 +3229,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d2/e2/dc81b1bd1dcfe91735810265e9d26bc8ec5da45b4c0f6237e286819194c3/uvicorn-0.35.0-py3-none-any.whl", hash = "sha256:197535216b25ff9b785e29a0b79199f55222193d47f820816e7da751e9bc8d4a", size = 66406, upload-time = "2025-06-28T16:15:44.816Z" },
 ]
 
-<<<<<<< HEAD
-=======
 [package.optional-dependencies]
 standard = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -3378,7 +3260,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/63/9a/0962b05b308494e3202d3f794a6e85abe471fe3cafdbcf95c2e8c713aabd/uvloop-0.21.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:a5c39f217ab3c663dc699c04cbd50c13813e31d917642d459fdcec07555cc553", size = 4660018, upload-time = "2024-10-14T23:38:10.888Z" },
 ]
 
->>>>>>> ollama_use_meta_chunk
 [[package]]
 name = "watchfiles"
 version = "1.1.0"
@@ -3447,8 +3328,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "websocket-client"
 version = "1.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3489,7 +3368,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "xxhash"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3593,8 +3471,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "zipp"
 version = "3.23.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3604,7 +3480,6 @@ wheels = [
 ]
 
 [[package]]
->>>>>>> ollama_use_meta_chunk
 name = "zstandard"
 version = "0.23.0"
 source = { registry = "https://pypi.org/simple" }
