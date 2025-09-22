@@ -1,6 +1,7 @@
 import os
+import uuid
 from langchain_openai import ChatOpenAI
-from typing import TypedDict, List, Dict, Any
+from typing import TypedDict, List, Dict, Any, Optional
 from typing_extensions import Annotated
 from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langgraph.graph import StateGraph, END
@@ -28,6 +29,9 @@ class MultiAgent:
         
         self.message_manager = MessagerManager(max_woking_memory=100, max_history=500)
         
+        self.checkpointer = InMemorySaver()
+        # 当前会话ID
+        self.current_thread_id = None
         # 构建多智能体工作流图
         self.graph = self._build_workflow()
     
@@ -69,7 +73,7 @@ class MultiAgent:
         # 设置入口点
         workflow.set_entry_point("planner")
         
-        return workflow.compile()
+        return workflow.compile(checkpointer=self.checkpointer)
     
     def _planner_node(self, state: MultiAgentState) -> Dict:
         """任务规划节点"""
@@ -516,8 +520,34 @@ class MultiAgent:
         
         return False
     
-    def process_query(self, user_query: str) -> Dict:
+    def start_new_session(self) -> str:
+        """开始新的会话"""
+        self.current_thread_id = str(uuid.uuid4())
+        print(f"🆕 开始新会话，会话ID: {self.current_thread_id}")
+        return self.current_thread_id
+    
+    def get_current_thread_id(self) -> str:
+        """获取当前会话ID"""
+        if self.current_thread_id is None:
+            self.start_new_session()
+        return self.current_thread_id
+    
+    def process_query(self, user_query: str, thread_id: Optional[str] = None) -> Dict:
         """处理用户查询"""
+        # 如果没有提供thread_id，使用当前会话ID或创建新的
+        if thread_id is None:
+            thread_id = self.get_current_thread_id()
+        else:
+            self.current_thread_id = thread_id
+        
+        # 创建配置
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "",  # 可选的命名空间
+            }
+        }
+        
         # 初始化状态
         initial_state = MultiAgentState(
             messages=[HumanMessage(content=user_query)],
@@ -537,13 +567,39 @@ class MultiAgent:
             current_tool_call_index=0
         )
         
-        # 运行工作流
+        # 运行工作流，传入配置
         final_state = initial_state
-        for output in self.graph.stream(initial_state):
+        for output in self.graph.stream(initial_state, config=config):
             if isinstance(output, dict):
                 final_state.update(output)
         
         return final_state
+    
+    def continue_conversation(self, user_query: str) -> Dict:
+        """继续当前会话的对话"""
+        return self.process_query(user_query, self.current_thread_id)
+    
+    def get_conversation_history(self, thread_id: Optional[str] = None) -> List:
+        """获取会话历史"""
+        if thread_id is None:
+            thread_id = self.get_current_thread_id()
+        
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "",
+            }
+        }
+        
+        try:
+            # 获取最新的检查点
+            checkpoint = self.checkpointer.get(config)
+            if checkpoint and checkpoint.channel_values:
+                return checkpoint.channel_values.get("messages", [])
+        except Exception as e:
+            print(f"获取会话历史失败: {e}")
+        
+        return []
 
 
 
@@ -595,6 +651,10 @@ def run_multi_agent_mode() -> bool:
     print("     • get_rag_stats - 查看知识库统计")
     print("     • delete_rag_document ./path/to/file.md - 删除指定文档")
     print("     • clear_rag_knowledge_base - 清空整个知识库")
+    print("\n💾 会话管理功能：")
+    print("     • 'new' - 开始新会话")
+    print("     • 'history' - 查看当前会话历史")
+    print("     • 会话状态会自动保存，支持多轮对话")
     print("\n输入 'quit' 或 'exit' 退出对话\n")
 
     while True:
@@ -606,13 +666,32 @@ def run_multi_agent_mode() -> bool:
                 break
             if not user_input:
                 continue
+            
+            # 处理特殊命令
+            if user_input.lower() == 'new':
+                multi_agent.start_new_session()
+                print("✨ 已开始新会话！")
+                continue
+            elif user_input.lower() == 'history':
+                history = multi_agent.get_conversation_history()
+                if history:
+                    print(f"\n📜 当前会话历史 (共{len(history)}条消息):")
+                    for i, msg in enumerate(history[-10:], 1):  # 显示最近10条
+                        if hasattr(msg, 'content'):
+                            content = msg.content[:100] + "..." if len(msg.content) > 100 else msg.content
+                            msg_type = type(msg).__name__
+                            print(f"   {i}. [{msg_type}] {content}")
+                else:
+                    print("📜 当前会话暂无历史记录")
+                continue
 
             print(f"\n{'='*60}")
             print(f"🚀 开始处理任务: {user_input}")
+            print(f"📝 会话ID: {multi_agent.get_current_thread_id()}")
             print(f"{'='*60}")
 
-            # 处理用户查询
-            final_state = multi_agent.process_query(user_input)
+            # 处理用户查询 - 使用continue_conversation以保持会话连续性
+            final_state = multi_agent.continue_conversation(user_input)
 
             print(f"\n{'='*60}")
             print("✅ 任务处理完成！")

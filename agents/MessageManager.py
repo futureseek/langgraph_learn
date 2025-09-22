@@ -106,9 +106,9 @@ class MessagerManager:
             tools = [msg for msg in working_memory if isinstance(msg, ToolMessage)]
             
             # 保留最近的消息
-            final_memory.extend(humans[-2:])  # 最近2个用户消息
-            final_memory.extend(ais[-2:])     # 最近2个AI消息
-            final_memory.extend(tools[-2:])   # 最近2个工具消息
+            final_memory.extend(humans[-10:])  # 最近10个用户消息
+            final_memory.extend(ais[-10:])     # 最近10个AI消息
+            final_memory.extend(tools[-10:])   # 最近10个工具消息
             
             # 去重并保持顺序
             seen = set()
