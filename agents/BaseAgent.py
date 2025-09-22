@@ -19,9 +19,17 @@ class BaseAgent:
         self.tools = {t.name: t for t in (tools or [])}
         checkpointer = InMemorySaver()
         self.message_manager = MessagerManager(max_woking_memory=50, max_history=200)
+<<<<<<< HEAD
         # for name in tools:
         #     print(name)    # 输出工具名称
         
+=======
+        """
+        if tools:
+            for tool in tools:
+                print(f"绑定工具: {tool.name}")
+        """
+>>>>>>> disperse
         # 如果有工具，绑定到模型
         if tools:
             self.model = self.model.bind_tools(tools)
@@ -30,9 +38,14 @@ class BaseAgent:
         """获取智能体的上下文信息"""
         # 使用 MessageManager 智能管理消息
         all_messages = state["messages"]
+<<<<<<< HEAD
         if len(all_messages) > 100:  # 只有消息较多时才使用 MessageManager
             print("使用 MessageManager 智能管理消息")
             managed_messages = self.message_manager([], all_messages[-20:])  # 从最近20条中智能选择
+=======
+        if len(all_messages) > 5:  # 降低阈值，更早启用消息管理
+            managed_messages = self.message_manager([], all_messages[-15:])  # 从最近15条中智能选择
+>>>>>>> disperse
         else:
             managed_messages = all_messages
         
@@ -240,4 +253,63 @@ class TaskEvaluatorAgent(BaseAgent):
             """,
             model=model,
             tools=[]  # 评估者通常不需要工具
+        )
+
+
+class HandlerAgent(BaseAgent):
+    def __init__(self, model):
+        super().__init__(
+            name="Handler",
+            role="流程控制专家",
+            system_prompt="""
+你是一名流程控制专家。你的职责是：
+
+🎯 核心任务：
+根据当前任务状态，决定下一步应该执行哪个节点。
+
+📋 可用节点：
+- planner: 任务规划节点，负责分析任务并制定执行计划
+- executor: 任务执行节点，负责调用工具执行具体操作  
+- tool_execution: 工具执行节点，负责处理工具调用结果
+- evaluator: 结果评估节点，负责评估执行结果
+- END: 结束节点，任务完成
+
+🔀 决策流程：
+1. start状态 → planner (开始任务规划)
+2. planning_complete状态 → executor (开始执行任务)
+3. execution_complete状态：
+   - 如果最后消息包含工具调用 → tool_execution (执行工具)
+   - 如果没有工具调用且任务未完成 → executor (继续执行)
+   - 如果任务已完成 → evaluator (评估结果)
+4. tool_execution_complete状态：
+   - 如果还有未执行的工具调用 → executor (继续执行)
+   - 如果所有工具调用已完成 → evaluator (评估结果)
+5. evaluation_complete状态 → END (任务完成)
+
+🧠 决策要点：
+- 检查最后一条消息是否包含tool_calls
+- 检查planned_tool_calls和executed_tool_calls的差异
+- 避免无限循环，最多执行5轮
+- 如果出现异常情况，默认转入evaluator
+
+⚠️ 重要规则：
+- 你必须严格按照上述流程进行决策
+- 只能返回以下节点名称之一：planner, executor, tool_execution, evaluator, END
+- 不要返回其他任何内容，只返回节点名称
+- 根据当前步骤(step)字段做出准确判断
+
+💡 输出格式：
+直接输出下一个节点名称，例如：
+planner
+或
+executor
+或
+evaluator
+或
+END
+
+注意：只输出节点名称，不要有任何其他文字说明。
+            """,
+            model=model,
+            tools=[]  # Handler不需要工具
         )
