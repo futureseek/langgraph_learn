@@ -19,17 +19,11 @@ class BaseAgent:
         self.tools = {t.name: t for t in (tools or [])}
         checkpointer = InMemorySaver()
         self.message_manager = MessagerManager(max_woking_memory=50, max_history=200)
-<<<<<<< HEAD
-        # for name in tools:
-        #     print(name)    # 输出工具名称
-        
-=======
         """
         if tools:
             for tool in tools:
                 print(f"绑定工具: {tool.name}")
         """
->>>>>>> disperse
         # 如果有工具，绑定到模型
         if tools:
             self.model = self.model.bind_tools(tools)
@@ -38,14 +32,9 @@ class BaseAgent:
         """获取智能体的上下文信息"""
         # 使用 MessageManager 智能管理消息
         all_messages = state["messages"]
-<<<<<<< HEAD
         if len(all_messages) > 100:  # 只有消息较多时才使用 MessageManager
             print("使用 MessageManager 智能管理消息")
             managed_messages = self.message_manager([], all_messages[-20:])  # 从最近20条中智能选择
-=======
-        if len(all_messages) > 5:  # 降低阈值，更早启用消息管理
-            managed_messages = self.message_manager([], all_messages[-15:])  # 从最近15条中智能选择
->>>>>>> disperse
         else:
             managed_messages = all_messages
         
@@ -177,10 +166,18 @@ class TaskPlannerAgent(BaseAgent):
 
 class TaskExecutorAgent(BaseAgent):
     def __init__(self, model, tools):
+        # 获取工具信息
+        tool_descriptions = []
+        if tools:
+            for tool in tools:
+                tool_descriptions.append(f"- {tool.name}: {getattr(tool, 'description', '工具')}")
+        
+        tools_info = "\n".join(tool_descriptions) if tool_descriptions else "暂无可用工具"
+        
         super().__init__(
             name="TaskExecutor", 
             role="任务执行专家",
-            system_prompt="""
+            system_prompt=f"""
 你是一名任务执行专家。你的职责是：
 
 ⚡ 核心任务：
@@ -195,10 +192,8 @@ class TaskExecutorAgent(BaseAgent):
 - 遇到问题时尝试解决或报告具体错误
 - 详细记录执行过程和结果
 
-📊 可用工具：
-- 搜索引擎：获取最新信息
-- 文档读取：读取本地文件
-- 文档导出：保存处理结果
+📊 当前可用工具：
+{tools_info}
 
 💼 执行策略：
 - 按步骤顺序执行

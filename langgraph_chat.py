@@ -90,8 +90,38 @@ class MultiAgent:
             print(f"✅ Handler处理成功")
             print(f"🤖 Handler原始响应: '{response.content}'")
             
+            # 清理响应内容，移除thinking标签
+            clean_response(response)
+            print(f"🧹 Handler清理后响应: '{response.content}'")
+            
             # 提取Handler的决策结果并存储到实例变量中
-            next_node = response.content.strip()
+            raw_decision = response.content.strip()
+            
+            # 验证并清理决策结果，从响应中提取有效的节点名称
+            valid_nodes = ["planner", "executor", "evaluator", "tool_execution", "END"]
+            next_node = None
+            
+            # 尝试从响应中提取有效的节点名称
+            for node in valid_nodes:
+                if node in raw_decision:
+                    next_node = node
+                    break
+            
+            # 如果没有找到有效节点，使用默认逻辑
+            if next_node is None:
+                step = state.get("step", "")
+                if step == "start":
+                    next_node = "planner"
+                elif step == "planning_complete":
+                    next_node = "executor"
+                elif step == "execution_complete":
+                    next_node = "evaluator"
+                elif step == "tool_execution_complete":
+                    next_node = "evaluator"
+                else:
+                    next_node = "END"
+                print(f"⚠️ Handler响应无效，使用默认决策: {next_node}")
+            
             self._current_decision = next_node  # 存储决策结果
             
             # 添加循环检测
@@ -341,14 +371,7 @@ class MultiAgent:
                 # 添加指导消息到状态
                 state["messages"].append(guidance_message)
             
-<<<<<<< HEAD
-            result = self.executor.process(temp_state)
-            response = result["response"]
-            # 输出加工
-            clean_response(response)
-=======
             print(f"✅ Executor处理成功")
->>>>>>> disperse
             
             # 更新状态
             state["messages"].append(response)
@@ -418,13 +441,6 @@ class MultiAgent:
                 
                 if tool_call['name'] in self.executor.tools:
                     try:
-<<<<<<< HEAD
-                        # 对于无参数的工具，传入空字符串
-                        if not tool_call['args'] or tool_call['args'] == {}:
-                            result = self.executor.tools[tool_call['name']].invoke("")
-                        else:
-                            result = self.executor.tools[tool_call['name']].invoke(tool_call['args'])
-=======
                         # 处理工具调用参数格式问题
                         args = tool_call['args']
                         print(f"🔍 原始参数: {args}")
@@ -443,7 +459,6 @@ class MultiAgent:
                             print(f"🔧 转换后参数: {args}")
                         
                         result = self.executor.tools[tool_call['name']].invoke(args)
->>>>>>> disperse
                         tool_results.append(ToolMessage(
                             tool_call_id=tool_call['id'],
                             name=tool_call['name'],
@@ -502,21 +517,6 @@ class MultiAgent:
         print(f"   - messages数量: {len(state.get('messages', []))}")
         print(f"   - execution_result长度: {len(str(state.get('execution_result', '')))}")
         
-<<<<<<< HEAD
-        result = self.evaluator.process(state)
-        response = result["response"]
-        # 输出加工
-        clean_response(response)
-        # 更新状态
-        state["messages"].append(response)
-        state["current_agent"] = self.evaluator.name
-        state["evaluation_result"] = response.content
-        state["step"] = "evaluation_complete"
-        state["completed"] = True
-        state["agent_history"].append(result["agent_record"])
-        
-        print(f"📊 评估结果：\n{response.content}")
-=======
         try:
             result = self.evaluator.process(state)
             response = result["response"]
@@ -542,7 +542,6 @@ class MultiAgent:
             state["step"] = "evaluation_complete"
             state["completed"] = True
             
->>>>>>> disperse
         return state
     
     def _extract_planned_tool_calls(self, task_plan: str) -> List[Dict]:
@@ -799,35 +798,6 @@ class MultiAgent:
         print(f"🔍 未找到需要执行的工具调用")
         return False
     
-<<<<<<< HEAD
-    def start_new_session(self) -> str:
-        """开始新的会话"""
-        self.current_thread_id = str(uuid.uuid4())
-        print(f"🆕 开始新会话，会话ID: {self.current_thread_id}")
-        return self.current_thread_id
-    
-    def get_current_thread_id(self) -> str:
-        """获取当前会话ID"""
-        if self.current_thread_id is None:
-            self.start_new_session()
-        return self.current_thread_id
-    
-    def process_query(self, user_query: str, thread_id: Optional[str] = None) -> Dict:
-        """处理用户查询"""
-        # 如果没有提供thread_id，使用当前会话ID或创建新的
-        if thread_id is None:
-            thread_id = self.get_current_thread_id()
-        else:
-            self.current_thread_id = thread_id
-        
-        # 创建配置
-        config = {
-            "configurable": {
-                "thread_id": thread_id,
-                "checkpoint_ns": "",  # 可选的命名空间
-            }
-        }
-=======
     def _diagnose_state(self, state: MultiAgentState, node_name: str):
         """诊断当前状态，帮助调试"""
         print(f"\n🔍 [{node_name}] 状态诊断:")
@@ -856,7 +826,14 @@ class MultiAgent:
         # 重置决策历史，避免跨查询的循环检测干扰
         if hasattr(self, '_decision_history'):
             self._decision_history = []
->>>>>>> disperse
+        
+        # 创建配置
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "",  # 可选的命名空间
+            }
+        }
         
         # 初始化状态
         initial_state = MultiAgentState(
@@ -886,6 +863,44 @@ class MultiAgent:
                         final_state.update(node_state)
         
         return final_state
+    
+    def continue_conversation(self, user_query: str) -> Dict:
+        """继续当前会话的对话"""
+        return self.process_query(user_query, self.current_thread_id)
+    
+    def get_conversation_history(self, thread_id: Optional[str] = None) -> List:
+        """获取会话历史"""
+        if thread_id is None:
+            thread_id = self.get_current_thread_id()
+        
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "checkpoint_ns": "",
+            }
+        }
+        
+        try:
+            # 获取最新的检查点
+            checkpoint = self.checkpointer.get(config)
+            if checkpoint and checkpoint.channel_values:
+                return checkpoint.channel_values.get("messages", [])
+        except Exception as e:
+            print(f"获取会话历史失败: {e}")
+        
+        return []
+    
+    def start_new_session(self) -> str:
+        """开始新的会话"""
+        self.current_thread_id = str(uuid.uuid4())
+        print(f"🆕 开始新会话，会话ID: {self.current_thread_id}")
+        return self.current_thread_id
+    
+    def get_current_thread_id(self) -> str:
+        """获取当前会话ID"""
+        if self.current_thread_id is None:
+            self.start_new_session()
+        return self.current_thread_id
     
     def continue_conversation(self, user_query: str) -> Dict:
         """继续当前会话的对话"""
@@ -946,34 +961,14 @@ def run_multi_agent_mode() -> bool:
     
     # 创建多智能体系统
     multi_agent = MultiAgent(model, tools)
+    
+    # 获取当前会话ID
+    session_id = multi_agent.get_current_thread_id()
 
     print("🤖 多智能体协作系统已启动！")
-<<<<<<< HEAD
-    print("📋 系统包含三个专门化智能体：")
-    print("   🎯 TaskPlanner - 任务拆解专家")
-    print("   ⚡ TaskExecutor - 任务执行专家") 
-    print("   🔍 TaskEvaluator - 结果评估专家")
-    print("\n🛠️ 可用工具：")
-    print("   🔍 搜索工具 - 网络信息检索")
-    print("   📄 文档工具 - 文件读取和导出")
-    print("   📁 路径工具 - 文件路径获取")
-    print("   🧠 RAG工具 - 智能文档问答系统")
-    print("     • add_document_to_rag ./doc/中华人民共和国证券法(2019修订).pdf - 添加文档到知识库")
-    print("     • add_directory_to_rag ./docs/ - 批量添加目录文档")
-    print("     • rag_question_answer 您的问题 - 基于知识库问答")
-    print("     • get_rag_stats - 查看知识库统计")
-    print("     • delete_rag_document ./path/to/file.md - 删除指定文档")
-    print("     • clear_rag_knowledge_base - 清空整个知识库")
-    print("\n💾 会话管理功能：")
-    print("     • 'new' - 开始新会话")
-    print("     • 'history' - 查看当前会话历史")
-    print("     • 会话状态会自动保存，支持多轮对话")
-    print("\n输入 'quit' 或 'exit' 退出对话\n")
-=======
     print(f"\n🧠 当前会话ID: {session_id} (支持记忆功能)")
-    print("📝 输入 'new' 创建新会话, '查看记忆' 查看对话历史")
+    print("📝 输入 'new' 创建新会话, 'history' 查看对话历史")
     print("输入 'quit' 或 'exit' 退出对话\n")
->>>>>>> disperse
 
     while True:
         try:
@@ -987,7 +982,7 @@ def run_multi_agent_mode() -> bool:
             
             # 处理特殊命令
             if user_input.lower() == 'new':
-                multi_agent.start_new_session()
+                session_id = multi_agent.start_new_session()
                 print("✨ 已开始新会话！")
                 continue
             elif user_input.lower() == 'history':
@@ -1008,8 +1003,8 @@ def run_multi_agent_mode() -> bool:
             print(f"📝 会话ID: {multi_agent.get_current_thread_id()}")
             print(f"{'='*60}")
 
-            # 处理用户查询 - 使用continue_conversation以保持会话连续性
-            final_state = multi_agent.continue_conversation(user_input)
+            # 处理用户查询 - 使用process_query并传入当前thread_id
+            final_state = multi_agent.process_query(user_input, multi_agent.get_current_thread_id())
 
             print(f"\n{'='*60}")
             print("✅ 任务处理完成！")
