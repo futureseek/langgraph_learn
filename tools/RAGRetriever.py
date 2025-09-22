@@ -6,7 +6,7 @@ from langchain.tools import Tool, StructuredTool
 from langchain.schema import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
-
+from .clean_think import clean_response
 from .VectorDatabase import VectorDatabase, create_vector_database
 from .DocumentProcessor import DocumentProcessor, create_document_processor, create_api_client
 
@@ -510,8 +510,7 @@ def create_rag_tools(model=None) -> List[Tool]:
     def rag_question_answer(question: str) -> str:
         """基于RAG知识库回答问题"""
         result = rag_retriever.answer_question(question)
-        
-        response = f"🤖 RAG回答:\n{result['answer']}\n"
+        response = f"🤖 RAG回答:\n{clean_response(result['answer'])}\n"
         
         if result["sources"]:
             response += f"\n📚 参考来源:\n"

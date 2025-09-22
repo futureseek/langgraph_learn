@@ -12,6 +12,7 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 import chromadb.utils.embedding_functions as embedding_functions
 from langchain_community.embeddings import OllamaEmbeddings
+from chromadb.errors import NotFoundError
 class VectorDatabase:
     """
     向量数据库管理器 - 基于ChromaDB实现RAG功能
@@ -20,7 +21,9 @@ class VectorDatabase:
     def __init__(self, 
                  persist_directory: str = "./rag_data/vector_db",
                  collection_name: str = "documents",
-                 embedding_model: str = "embeddinggemma:300m"):
+                 embedding_model: str = "embeddinggemma:300m",
+                 metric: str = "cosine"  # 新增参数，用以指定度量空间
+                 ):
         """
         初始化向量数据库
         
@@ -28,11 +31,12 @@ class VectorDatabase:
             persist_directory: 数据库持久化目录
             collection_name: 集合名称
             embedding_model: 嵌入模型名称
+            metric: 向量相似度度量方式，如 "cosine", "l2", "ip"
         """
         self.persist_directory = Path(persist_directory)
         self.persist_directory.mkdir(parents=True, exist_ok=True)
-        
         self.collection_name = collection_name
+        self.metric = metric
         self.embedding_model_name = embedding_model
         
         # # 初始化嵌入模型
@@ -58,15 +62,23 @@ class VectorDatabase:
         
         # 获取或创建集合
         try:
-            self.collection = self.client.get_collection(name=collection_name)
-            print(f"✅ 已连接到现有集合: {collection_name}")
-        except Exception:
-            # 创建一个集合，用余弦相似度搜索
+            self.collection = self.client.get_or_create_collection(name=self.collection_name)
+            print(f"✅ 已找到 collection: {self.collection_name}")
+            # 检查 metadata / metric 是否一致
+            existing_meta = self.collection.metadata or {}
+            existing_metric = existing_meta.get("hnsw:space")
+            if existing_metric and existing_metric != self.metric:
+                raise ValueError(
+                    f"已存在 collection '{self.collection_name}'，但 metric 不一致 "
+                    f"(已有: {existing_metric}, 期望: {self.metric})"
+                )
+        except NotFoundError:
+            # 如果不存在，就新建
+            print(f"⚠️ collection '{self.collection_name}' 不存在，正在新建...")
             self.collection = self.client.create_collection(
-                name=collection_name,
-                metadata={"hnsw:space": "cosine"}
+                name=self.collection_name,
+                metadata={"hnsw:space": self.metric}
             )
-            print(f"✅ 已创建新集合: {collection_name}")
         
         # 初始化向量存储
         self.vector_store = Chroma(
@@ -323,48 +335,25 @@ class VectorDatabase:
             return False
     
     def clear_all(self) -> bool:
-        """彻底清空所有数据，包括 collection 和 SQLite 文件"""
+        """
+        清空所有内容：删除 collection 中的所有文档块 + 清空 metadata，
+        但保留 collection 本身与 persist 目录。
+        """
         try:
-            # 先尝试删除集合（逻辑层）
-            try:
-                self.client.delete_collection(name=self.collection_name)
-            except Exception:
-                pass  # 集合可能不存在，忽略
-
-            self.close()
-            # 1️⃣ 删除整个持久化目录
-            if self.persist_directory.exists():
-                import shutil
-                shutil.rmtree(self.persist_directory)
-                print(f"🗑️ 已删除持久化目录: {self.persist_directory}")
-
-            # 2️⃣ 重新创建持久化目录
-            self.persist_directory.mkdir(parents=True, exist_ok=True)
-
-            # 3️⃣ 重建 ChromaDB 客户端
-            self.client = chromadb.PersistentClient(
-                path=str(self.persist_directory),
-                settings=Settings(
-                    anonymized_telemetry=False,
-                    allow_reset=True
-                )
-            )
-
-            # 4️⃣ 重新创建 collection
-            self.collection = self.client.create_collection(
-                name=self.collection_name,
-                metadata={"hnsw:space": "cosine"}
-            )
-
-            # 5️⃣ 重新初始化向量存储
-            self.vector_store = Chroma(
-                client=self.client,
-                collection_name=self.collection_name,
-                embedding_function=self.embeddings,
-                persist_directory=str(self.persist_directory)
-            )
-
-            # 6️⃣ 清空元数据并保存
+            # 1️⃣ 获取 collection
+            if not hasattr(self, "collection") or self.collection is None:
+                self.collection = self.client.get_collection(name=self.collection_name)
+            
+            # 2️⃣ 获取 collection 中所有 ids
+            results = self.collection.get()   # ✅ 不要传 include=["ids"]
+            all_ids = results.get("ids", [])
+            
+            # 3️⃣ 删除所有文档块
+            if all_ids:
+                self.collection.delete(ids=all_ids)
+                print(f"🗑️ 删除了 {len(all_ids)} 个文档块（chunks）")
+            
+            # 4️⃣ 重置元数据
             self.metadata = {
                 "documents": {},
                 "collections": {},
@@ -375,25 +364,36 @@ class VectorDatabase:
                 }
             }
             self._save_metadata()
+            
+            # 5️⃣ Optionally：重建 vector_store 引用
+            self.vector_store = Chroma(
+                client=self.client,
+                collection_name=self.collection_name,
+                embedding_function=self.embeddings,
+                persist_directory=str(self.persist_directory)
+            )
 
-            print("✅ 已彻底清空所有数据，包括 SQLite 文件和 collection")
+            print("✅ 已清空 collection 内容和元数据，保留 collection 与目录")
             return True
-
         except Exception as e:
-            print(f"❌ 清空数据失败: {e}")
+            print(f"❌ 清空内容失败: {e}")
             return False
+
         
     def close(self):
         """
         主动释放/关闭 Chroma 客户端，解除 SQLite 文件锁。
         """
         try:
-            # Chroma 的 PersistentClient 没有显式 close 方法
-            # 所以可以用 del + 强制 GC 触发关闭
-            import gc
-            del self.client
-            del self.collection
+        # 删除引用，等待 GC 回收
+            self.client = None
+            self.collection = None
+            self.vector_store = None
+
+            import gc, time
             gc.collect()
+            time.sleep(0.5)  # 给 Windows 一点时间释放文件锁
+
             print("VectorDatabase 已关闭，SQLite 文件锁已释放。")
         except Exception as e:
             print(f"关闭 VectorDatabase 出错: {e}")
@@ -414,3 +414,52 @@ def create_vector_database(persist_directory: str = "./rag_data/vector_db",
         persist_directory=persist_directory,
         collection_name=collection_name
     )
+
+def main():
+    # 1️⃣ 初始化数据库
+    db = create_vector_database()
+
+    # 2️⃣ 构造示例文档
+    docs = [
+        Document(page_content="苹果是一种常见的水果，富含维生素。", metadata={"category": "fruit"}),
+        Document(page_content="篮球是一项流行的运动，起源于美国。", metadata={"category": "sport"}),
+        Document(page_content="Python 是一种流行的编程语言，适合数据科学和人工智能。", metadata={"category": "tech"})
+    ]
+
+    # 3️⃣ 添加文档
+    print("\n>>> 添加文档")
+    db.add_documents(docs, source_file="doc/demo.txt")
+
+    # 4️⃣ 相似性搜索
+    print("\n>>> 相似性搜索：'编程语言'")
+    results = db.similarity_search("编程语言", k=2)
+    for i, doc in enumerate(results, start=1):
+        print(f"[{i}] {doc.page_content} | metadata={doc.metadata}")
+
+    # 5️⃣ 查看统计信息
+    print("\n>>> 数据库统计信息")
+    print(db.get_stats())
+
+    # 6️⃣ 列出文档
+    print("\n>>> 已索引的文档")
+    for doc in db.list_documents():
+        print(doc)
+
+    # 7️⃣ 删除文档
+    print("\n>>> 删除文档 demo.txt")
+    db.delete_document("doc\\demo.txt")
+
+    # 8️⃣ 再次查看统计
+    print("\n>>> 删除后的统计信息")
+    print(db.get_stats())
+
+    # 9️⃣ 清空所有数据
+    print("\n>>> 清空整个数据库")
+    db.clear_all()
+
+    # 🔟 关闭数据库连接
+    db.close()
+
+
+if __name__ == "__main__":
+    main()

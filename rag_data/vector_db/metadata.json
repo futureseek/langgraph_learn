@@ -1,15 +1,15 @@
 {
   "documents": {
-    "C:\\Users\\a\\Downloads\\langgraph_learn-use_meta_chunk\\doc\\中华人民共和国证券法(2019修订).pdf": {
-      "hash": "b089a9409b955a872e23760dc1a73f0f",
-      "chunks": 300,
+    "C:\\Users\\a\\Downloads\\langgraph_learn-use_meta_chunk\\doc\\demo.txt": {
+      "hash": "e2f5a0d8758599c0cfdc1eff5f043c07",
+      "chunks": 3,
       "processed_at": "C:\\Users\\a\\Downloads\\langgraph_learn-use_meta_chunk"
     }
   },
   "collections": {},
   "stats": {
     "total_documents": 1,
-    "total_chunks": 300,
+    "total_chunks": 3,
     "last_updated": null
   }
 }

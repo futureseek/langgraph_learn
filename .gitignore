@@ -20,3 +20,5 @@ test.py
 test_ollama.py
 jsonl_to_json.py
 rag_data/vector_db/
+quick_test_rag.py
+SYSTEM_DOCUMENTATION.md
